@@ -16,7 +16,9 @@ async function isFile(filePath) {
 function renameTarget(target, rename) {
   const parsedPath = path.parse(target)
 
-  return typeof rename === 'string' ? rename : rename(parsedPath.name, parsedPath.ext.replace('.', ''))
+  return typeof rename === 'string'
+    ? rename
+    : rename(parsedPath.name, parsedPath.ext.replace('.', ''))
 }
 
 async function generateCopyTarget(src, dest, file, { flatten, rename, transform }) {
@@ -122,7 +124,9 @@ export default function copy(options = {}) {
           }
 
           if (rename && typeof rename !== 'string' && typeof rename !== 'function') {
-            throw new Error(`${stringify(target)} target's "rename" property must be a string or a function`)
+            throw new Error(
+              `${stringify(target)} target's "rename" property must be a string or a function`
+            )
           }
 
           const matchedPaths = await globby(src, {
@@ -136,12 +140,22 @@ export default function copy(options = {}) {
             if (Array.isArray(dest)) {
               const targetsList = await Promise.all(
                 dest.map((destination) =>
-                  generateCopyTargets(matchedPaths, destination, file, { flatten, rename, transform })
+                  generateCopyTargets(matchedPaths, destination, file, {
+                    flatten,
+                    rename,
+                    transform
+                  })
                 )
               )
               copyTargets.push(...targetsList.flat(1))
             } else {
-              copyTargets.push(...(await generateCopyTargets(matchedPaths, dest, file, { flatten, rename, transform })))
+              copyTargets.push(
+                ...(await generateCopyTargets(matchedPaths, dest, file, {
+                  flatten,
+                  rename,
+                  transform
+                }))
+              )
             }
           }
         }
