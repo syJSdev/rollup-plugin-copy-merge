@@ -6,6 +6,8 @@
     "object-curly-newline": ["error", { "multiline": true, "consistent": true }],
     "semi": ["error", "never"],
     "object-shorthand": ["off"],
+    "no-console": ["off"],
+    "no-await-in-loop": ["off"],
     "prettier/prettier": ["error"]
   },
   "env": {
