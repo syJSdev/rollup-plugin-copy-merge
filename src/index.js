@@ -1,6 +1,5 @@
-/* eslint-disable no-await-in-loop, no-console, no-restricted-syntax */
 import path from 'path'
-import fsJet from 'fs-jetpack'
+import fs from 'fs-extra'
 import isObject from 'is-plain-object'
 import globby from 'globby'
 import { bold, green, yellow } from 'colorette'
@@ -8,9 +7,9 @@ import { bold, green, yellow } from 'colorette'
 import { ensureTrailingNewLine, stringify } from './utils'
 
 async function isFile(filePath) {
-  const fileStats = await fsJet.inspectAsync(filePath)
+  const fileStats = await fs.stat(filePath)
 
-  return fileStats.type === 'file'
+  return fileStats.isFile()
 }
 
 function renameTarget(target, rename) {
@@ -42,7 +41,7 @@ async function generateCopyTarget(src, dest, file, { flatten, rename, transform 
   }
   let contents
   if (file || transform) {
-    contents = await fsJet.readAsync(src)
+    contents = await fs.readFile(src, 'utf-8')
     if (transform) {
       contents = await transform(contents)
     }
@@ -112,7 +111,8 @@ export default function copy(options = {}) {
       const copyTargets = []
 
       if (Array.isArray(targets) && targets.length) {
-        for (const target of targets) {
+        for (let index = 0; index < targets.length; index += 1) {
+          const target = targets[index]
           if (!isObject(target)) {
             throw new Error(`${stringify(target)} target must be an object`)
           }
@@ -147,15 +147,16 @@ export default function copy(options = {}) {
                   })
                 )
               )
-              copyTargets.push(...targetsList.flat(1))
+              targetsList.forEach((ts) => {
+                copyTargets.push(...ts)
+              })
             } else {
-              copyTargets.push(
-                ...(await generateCopyTargets(matchedPaths, dest, file, {
-                  flatten,
-                  rename,
-                  transform
-                }))
-              )
+              const ts = await generateCopyTargets(matchedPaths, dest, file, {
+                flatten,
+                rename,
+                transform
+              })
+              copyTargets.push(...ts)
             }
           }
         }
@@ -166,15 +167,16 @@ export default function copy(options = {}) {
           console.log(green('copied:'))
         }
 
-        for (const copyTarget of copyTargets) {
+        for (let index = 0; index < copyTargets.length; index += 1) {
+          const copyTarget = copyTargets[index]
           const { src, contents, transformed, merge, merged, dest } = copyTarget
 
-          if (transformed || merged) {
-            if (merge || transformed) {
-              await fsJet.writeAsync(dest, contents, restPluginOptions)
-            }
+          if (transformed) {
+            await fs.outputFile(dest, contents)
+          } else if (merged) {
+            if (merge) await fs.outputFile(dest, contents)
           } else {
-            await fsJet.copyAsync(src, dest, { overwrite: true, ...restPluginOptions })
+            await fs.copy(src, dest, restPluginOptions)
           }
 
           if (verbose) {

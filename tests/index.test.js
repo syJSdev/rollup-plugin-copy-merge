@@ -285,9 +285,9 @@ describe('Concat', () => {
     })
 
     expect(await fs.pathExists('dist/asset-all.js')).toBe(true)
-    const contents = await fs.readFile('dist/asset-all.js', 'utf8')
-    const contents1 = await fs.readFile('src/assets/asset-1.js', 'utf8')
-    const contents2 = await fs.readFile('src/assets/asset-2.js', 'utf8')
+    const contents = await readFile('dist/asset-all.js')
+    const contents1 = await readFile('src/assets/asset-1.js')
+    const contents2 = await readFile('src/assets/asset-2.js')
     expect(contents === ensureTrailingNewLine(contents1).concat(contents2)).toBe(true)
   })
 
@@ -297,9 +297,9 @@ describe('Concat', () => {
     })
 
     expect(await fs.pathExists('dist/css-all.css')).toBe(true)
-    const contents = await fs.readFile('dist/css-all.css', 'utf8')
-    const contents1 = await fs.readFile('src/assets/css/css-1.css', 'utf8')
-    const contents2 = await fs.readFile('src/assets/css/css-2.css', 'utf8')
+    const contents = await readFile('dist/css-all.css')
+    const contents1 = await readFile('src/assets/css/css-1.css')
+    const contents2 = await readFile('src/assets/css/css-2.css')
     expect(contents === ensureTrailingNewLine(contents1).concat(contents2)).toBe(true)
   })
 
@@ -313,7 +313,6 @@ describe('Concat', () => {
 })
 
 describe('Options', () => {
-  /* eslint-disable no-console */
   test('Verbose, copy files', async () => {
     console.log = jest.fn()
 
