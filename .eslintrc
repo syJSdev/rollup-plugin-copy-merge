@@ -1,0 +1,14 @@
+{
+  "extends": ["airbnb-base", "prettier"],
+  "plugins": ["prettier", "import"],
+  "rules": {
+    "comma-dangle": ["error", "never"],
+    "object-curly-newline": ["error", { "multiline": true, "consistent": true }],
+    "semi": ["error", "never"],
+    "object-shorthand": ["off"],
+    "prettier/prettier": ["error"]
+  },
+  "env": {
+    "jest": true
+  }
+}
