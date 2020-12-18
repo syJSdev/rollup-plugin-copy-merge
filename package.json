@@ -33,7 +33,9 @@
     "eslint-config-prettier": "^7.0.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.3.0",
+    "husky": "^4.3.6",
     "jest": "^24.9.0",
+    "lint-staged": "^10.5.3",
     "prettier": "^2.2.1",
     "replace-in-file": "^5.0.2",
     "rimraf": "^3.0.0",
@@ -47,6 +49,23 @@
     "index.d.ts",
     "readme.md"
   ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --quiet --fix"
+    ],
+    "*.{json,md,html}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "npm": ">=6.0.0",
+    "node": ">=12.0.0"
+  },
   "keywords": [
     "rollup",
     "rollup-plugin",
@@ -58,10 +77,9 @@
     "files",
     "folder",
     "folders",
-    "glob"
+    "glob",
+    "concat",
+    "merge"
   ],
-  "engines": {
-    "node": ">=8.3"
-  },
   "license": "MIT"
 }
