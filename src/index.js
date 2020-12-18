@@ -1,46 +1,91 @@
 /* eslint-disable no-await-in-loop, no-console, no-restricted-syntax */
 import path from 'path'
-import util from 'util'
-import fs from 'fs-extra'
+import fsJet from 'fs-jetpack'
 import isObject from 'is-plain-object'
 import globby from 'globby'
 import { bold, green, yellow } from 'colorette'
 
-function stringify(value) {
-  return util.inspect(value, { breakLength: Infinity })
-}
+import { ensureTrailingNewLine, stringify } from './utils'
 
 async function isFile(filePath) {
-  const fileStats = await fs.stat(filePath)
+  const fileStats = await fsJet.inspectAsync(filePath)
 
-  return fileStats.isFile()
+  return fileStats.type === 'file'
 }
 
 function renameTarget(target, rename) {
   const parsedPath = path.parse(target)
 
-  return typeof rename === 'string'
-    ? rename
-    : rename(parsedPath.name, parsedPath.ext.replace('.', ''))
+  return typeof rename === 'string' ? rename : rename(parsedPath.name, parsedPath.ext.replace('.', ''))
 }
 
-async function generateCopyTarget(src, dest, { flatten, rename, transform }) {
-  if (transform && !await isFile(src)) {
-    throw new Error(`"transform" option works only on files: '${src}' must be a file`)
+async function generateCopyTarget(src, dest, file, { flatten, rename, transform }) {
+  if (!(await isFile(src))) {
+    if (transform) {
+      throw new Error(`"transform" option works only on files: '${src}' must be a file`)
+    }
+    if (file) {
+      throw new Error(`"file" option works only on files: '${src}' must be a file`)
+    }
   }
 
   const { base, dir } = path.parse(src)
-  const destinationFolder = (flatten || (!flatten && !dir))
-    ? dest
-    : dir.replace(dir.split('/')[0], dest)
+  let destination
+  if (file) {
+    // ignore the dest, flatten and rename
+    destination = file
+  } else {
+    destination = flatten || (!flatten && !dir) ? dest : dir.replace(dir.split('/')[0], dest)
+    destination = path.join(destination, rename ? renameTarget(base, rename) : base)
+  }
+  let contents
+  if (file || transform) {
+    contents = await fsJet.readAsync(src)
+    if (transform) {
+      contents = await transform(contents)
+    }
+  }
 
   return {
-    src,
-    dest: path.join(destinationFolder, rename ? renameTarget(base, rename) : base),
-    ...(transform && { contents: await transform(await fs.readFile(src)) }),
-    renamed: rename,
-    transformed: transform
+    src: src,
+    dest: destination,
+    contents: contents,
+    renamed: !!rename,
+    transformed: !!transform,
+    merge: !!file
   }
+}
+/* eslint no-param-reassign: ["error", { "props": false }] */
+function concatContents(targets) {
+  const dests = []
+  const indexes = []
+  for (let index = 0; index < targets.length; index += 1) {
+    if (targets[index].merge) {
+      const i = dests.indexOf(targets[index].dest)
+      if (i >= 0) {
+        const mergeIndex = indexes[i]
+
+        const target = targets[mergeIndex]
+        target.contents = ensureTrailingNewLine(target.contents).concat(targets[index].contents)
+        delete targets[index].contents
+        delete targets[index].merge
+      } else {
+        dests.push(targets[index].dest)
+        indexes.push(index)
+      }
+      targets[index].merged = true
+    }
+  }
+
+  return targets
+}
+/* eslint no-param-reassign: ["error"] */
+
+async function generateCopyTargets(srcs, dest, file, { flatten, rename, transform }) {
+  const targets = await Promise.all(
+    srcs.map((src) => generateCopyTarget(src, dest, file, { flatten, rename, transform }))
+  )
+  return concatContents(targets)
 }
 
 export default function copy(options = {}) {
@@ -70,9 +115,9 @@ export default function copy(options = {}) {
             throw new Error(`${stringify(target)} target must be an object`)
           }
 
-          const { dest, rename, src, transform, ...restTargetOptions } = target
+          const { dest, rename, src, transform, file, ...restTargetOptions } = target
 
-          if (!src || !dest) {
+          if (!src || (!dest && !file)) {
             throw new Error(`${stringify(target)} target must have "src" and "dest" properties`)
           }
 
@@ -88,16 +133,15 @@ export default function copy(options = {}) {
           })
 
           if (matchedPaths.length) {
-            for (const matchedPath of matchedPaths) {
-              const generatedCopyTargets = Array.isArray(dest)
-                ? await Promise.all(dest.map((destination) => generateCopyTarget(
-                  matchedPath,
-                  destination,
-                  { flatten, rename, transform }
-                )))
-                : [await generateCopyTarget(matchedPath, dest, { flatten, rename, transform })]
-
-              copyTargets.push(...generatedCopyTargets)
+            if (Array.isArray(dest)) {
+              const targetsList = await Promise.all(
+                dest.map((destination) =>
+                  generateCopyTargets(matchedPaths, destination, file, { flatten, rename, transform })
+                )
+              )
+              copyTargets.push(...targetsList.flat(1))
+            } else {
+              copyTargets.push(...(await generateCopyTargets(matchedPaths, dest, file, { flatten, rename, transform })))
             }
           }
         }
@@ -109,18 +153,20 @@ export default function copy(options = {}) {
         }
 
         for (const copyTarget of copyTargets) {
-          const { contents, dest, src, transformed } = copyTarget
+          const { src, contents, transformed, merge, merged, dest } = copyTarget
 
-          if (transformed) {
-            await fs.outputFile(dest, contents, restPluginOptions)
+          if (transformed || merged) {
+            if (merge || transformed) {
+              await fsJet.writeAsync(dest, contents, restPluginOptions)
+            }
           } else {
-            await fs.copy(src, dest, restPluginOptions)
+            await fsJet.copyAsync(src, dest, { overwrite: true, ...restPluginOptions })
           }
 
           if (verbose) {
             let message = green(`  ${bold(src)} → ${bold(dest)}`)
             const flags = Object.entries(copyTarget)
-              .filter(([key, value]) => ['renamed', 'transformed'].includes(key) && value)
+              .filter(([key, value]) => ['renamed', 'transformed', 'merged'].includes(key) && value)
               .map(([key]) => key.charAt(0).toUpperCase())
 
             if (flags.length) {
