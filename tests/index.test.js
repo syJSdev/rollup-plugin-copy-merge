@@ -1,10 +1,13 @@
-const { rollup, watch } = require('rollup')
-const fs = require('fs-extra')
-const replace = require('replace-in-file')
-const { bold, green, yellow } = require('colorette')
-const copy = require('../dist/index.cjs')
+import { rollup, watch } from 'rollup'
+import fs from 'fs-extra'
+import replace from 'replace-in-file'
+import { bold, green, yellow, options } from 'colorette'
+import copy from '../src'
+import { ensureTrailingNewLine } from '../src/utils'
 
 process.chdir(`${__dirname}/fixtures`)
+
+options.enabled = true
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -17,9 +20,7 @@ function readFile(path) {
 async function build(pluginOptions) {
   await rollup({
     input: 'src/index.js',
-    plugins: [
-      copy(pluginOptions)
-    ]
+    plugins: [copy(pluginOptions)]
   })
 }
 
@@ -45,13 +46,12 @@ describe('Copy', () => {
 
   test('Files', async () => {
     await build({
-      targets: [{
-        src: [
-          'src/assets/asset-1.js',
-          'src/assets/asset-2.js'
-        ],
-        dest: 'dist'
-      }]
+      targets: [
+        {
+          src: ['src/assets/asset-1.js', 'src/assets/asset-2.js'],
+          dest: 'dist'
+        }
+      ]
     })
 
     expect(await fs.pathExists('dist/asset-1.js')).toBe(true)
@@ -60,13 +60,12 @@ describe('Copy', () => {
 
   test('Folders', async () => {
     await build({
-      targets: [{
-        src: [
-          'src/assets/css',
-          'src/assets/scss'
-        ],
-        dest: 'dist'
-      }]
+      targets: [
+        {
+          src: ['src/assets/css', 'src/assets/scss'],
+          dest: 'dist'
+        }
+      ]
     })
 
     expect(await fs.pathExists('dist/css')).toBe(true)
@@ -81,15 +80,12 @@ describe('Copy', () => {
 
   test('Glob', async () => {
     await build({
-      targets: [{
-        src: [
-          'src/assets/asset-{1,2}.js',
-          'src/assets/css/*.css',
-          '!**/css-1.css',
-          'src/assets/scss/scss-?(1).scss'
-        ],
-        dest: 'dist'
-      }]
+      targets: [
+        {
+          src: ['src/assets/asset-{1,2}.js', 'src/assets/css/*.css', '!**/css-1.css', 'src/assets/scss/scss-?(1).scss'],
+          dest: 'dist'
+        }
+      ]
     })
 
     expect(await fs.pathExists('dist/asset-1.js')).toBe(true)
@@ -119,14 +115,12 @@ describe('Copy', () => {
 
   test('Multiple destinations', async () => {
     await build({
-      targets: [{
-        src: [
-          'src/assets/asset-1.js',
-          'src/assets/css',
-          'src/assets/scss/scss-?(1).scss'
-        ],
-        dest: ['dist', 'build']
-      }]
+      targets: [
+        {
+          src: ['src/assets/asset-1.js', 'src/assets/css', 'src/assets/scss/scss-?(1).scss'],
+          dest: ['dist', 'build']
+        }
+      ]
     })
 
     expect(await fs.pathExists('dist/asset-1.js')).toBe(true)
@@ -157,34 +151,30 @@ describe('Copy', () => {
   })
 
   test('Throw if target is not an object', async () => {
-    await expect(build({
-      targets: [
-        'src/assets/asset-1.js'
-      ]
-    })).rejects.toThrow('\'src/assets/asset-1.js\' target must be an object')
+    await expect(
+      build({
+        targets: ['src/assets/asset-1.js']
+      })
+    ).rejects.toThrow("'src/assets/asset-1.js' target must be an object")
   })
 
-  test('Throw if target object doesn\'t have required properties', async () => {
-    await expect(build({
-      targets: [
-        { src: 'src/assets/asset-1.js' }
-      ]
-    }))
-      .rejects
-      .toThrow('{ src: \'src/assets/asset-1.js\' } target must have "src" and "dest" properties')
+  test("Throw if target object doesn't have required properties", async () => {
+    await expect(
+      build({
+        targets: [{ src: 'src/assets/asset-1.js' }]
+      })
+    ).rejects.toThrow('{ src: \'src/assets/asset-1.js\' } target must have "src" and "dest" properties')
   })
 
   test('Throw if target object "rename" property is of wrong type', async () => {
-    await expect(build({
-      targets: [
-        { src: 'src/assets/asset-1.js', dest: 'dist', rename: [] }
-      ]
-    }))
-      .rejects
-      .toThrow(
-        '{ src: \'src/assets/asset-1.js\', dest: \'dist\', rename: [] }'
-        + ' target\'s "rename" property must be a string or a function'
-      )
+    await expect(
+      build({
+        targets: [{ src: 'src/assets/asset-1.js', dest: 'dist', rename: [] }]
+      })
+    ).rejects.toThrow(
+      "{ src: 'src/assets/asset-1.js', dest: 'dist', rename: [] }" +
+        ' target\'s "rename" property must be a string or a function'
+    )
   })
 
   test('Rename target', async () => {
@@ -206,11 +196,7 @@ describe('Copy', () => {
         {
           src: 'src/assets/scss/*',
           dest: 'dist/scss-multiple',
-          rename: (name, extension) => (
-            extension
-              ? `${name}-renamed.${extension}`
-              : `${name}-renamed`
-          )
+          rename: (name, extension) => (extension ? `${name}-renamed.${extension}` : `${name}-renamed`)
         }
       ]
     })
@@ -234,26 +220,33 @@ describe('Copy', () => {
   })
 
   test('Throw if transform target is not a file', async () => {
-    await expect(build({
-      targets: [{
-        src: 'src/assets/css',
-        dest: 'dist',
-        transform: (contents) => contents.toString().replace('blue', 'red')
-      }]
-    })).rejects.toThrow('"transform" option works only on files: \'src/assets/css\' must be a file')
+    await expect(
+      build({
+        targets: [
+          {
+            src: 'src/assets/css',
+            dest: 'dist',
+            transform: (contents) => contents.toString().replace('blue', 'red')
+          }
+        ]
+      })
+    ).rejects.toThrow('"transform" option works only on files: \'src/assets/css\' must be a file')
   })
 
   test('Transform target', async () => {
     await build({
-      targets: [{
-        src: 'src/assets/css/css-1.css',
-        dest: ['dist', 'build'],
-        transform: (contents) => contents.toString().replace('blue', 'red')
-      }, {
-        src: 'src/assets/scss/**/*.scss',
-        dest: 'dist',
-        transform: (contents) => contents.toString().replace('background-color', 'color')
-      }]
+      targets: [
+        {
+          src: 'src/assets/css/css-1.css',
+          dest: ['dist', 'build'],
+          transform: (contents) => contents.toString().replace('blue', 'red')
+        },
+        {
+          src: 'src/assets/scss/**/*.scss',
+          dest: 'dist',
+          transform: (contents) => contents.toString().replace('background-color', 'color')
+        }
+      ]
     })
 
     expect(await fs.pathExists('dist/css-1.css')).toBe(true)
@@ -269,21 +262,52 @@ describe('Copy', () => {
   })
 })
 
+describe('Concat', () => {
+  test('Files', async () => {
+    await build({
+      targets: [{ src: ['src/assets/asset-1.js', 'src/assets/asset-2.js'], file: 'dist/asset-all.js' }]
+    })
+
+    expect(await fs.pathExists('dist/asset-all.js')).toBe(true)
+    const contents = await fs.readFile('dist/asset-all.js', 'utf8')
+    const contents1 = await fs.readFile('src/assets/asset-1.js', 'utf8')
+    const contents2 = await fs.readFile('src/assets/asset-2.js', 'utf8')
+    expect(contents === ensureTrailingNewLine(contents1).concat(contents2)).toBe(true)
+  })
+
+  test('Glob', async () => {
+    await build({
+      targets: [{ src: 'src/assets/css/*', file: 'dist/css-all.css' }]
+    })
+
+    expect(await fs.pathExists('dist/css-all.css')).toBe(true)
+    const contents = await fs.readFile('dist/css-all.css', 'utf8')
+    const contents1 = await fs.readFile('src/assets/css/css-1.css', 'utf8')
+    const contents2 = await fs.readFile('src/assets/css/css-2.css', 'utf8')
+    expect(contents === ensureTrailingNewLine(contents1).concat(contents2)).toBe(true)
+  })
+
+  test('Throw if concat targets are not files', async () => {
+    await expect(
+      build({
+        targets: [{ src: 'src/assets/css', file: 'dist/css-all.css' }]
+      })
+    ).rejects.toThrow('"file" option works only on files: \'src/assets/css\' must be a file')
+  })
+})
+
 describe('Options', () => {
   /* eslint-disable no-console */
   test('Verbose, copy files', async () => {
     console.log = jest.fn()
 
     await build({
-      targets: [{
-        src: [
-          'src/assets/asset-1.js',
-          'src/assets/css/*',
-          'src/assets/scss',
-          'src/not-exist'
-        ],
-        dest: 'dist'
-      }],
+      targets: [
+        {
+          src: ['src/assets/asset-1.js', 'src/assets/css/*', 'src/assets/scss', 'src/not-exist'],
+          dest: 'dist'
+        }
+      ],
       verbose: true
     })
 
@@ -295,13 +319,30 @@ describe('Options', () => {
     expect(console.log).toHaveBeenCalledWith(green(`  ${bold('src/assets/scss')} → ${bold('dist/scss')}`))
   })
 
-  test('Verbose, no files to copy', async () => {
+  test('Verbose, merge files', async () => {
     console.log = jest.fn()
 
     await build({
       targets: [
-        { src: 'src/not-exist', dest: 'dist' }
+        {
+          src: ['src/assets/*.js'],
+          file: 'dist/asset-all.js'
+        }
       ],
+      verbose: true
+    })
+
+    expect(console.log).toHaveBeenCalledTimes(3)
+    expect(console.log).toHaveBeenCalledWith(green('copied:'))
+    expect(console.log).toHaveBeenCalledWith(`${green(`  ${bold('src/assets/asset-1.js')} → ${bold('dist/asset-all.js')}`)} ${yellow('[M]')}`)
+    expect(console.log).toHaveBeenCalledWith(`${green(`  ${bold('src/assets/asset-2.js')} → ${bold('dist/asset-all.js')}`)} ${yellow('[M]')}`)
+  })
+
+  test('Verbose, no files to copy', async () => {
+    console.log = jest.fn()
+
+    await build({
+      targets: [{ src: 'src/not-exist', dest: 'dist' }],
       verbose: true
     })
 
@@ -318,11 +359,7 @@ describe('Options', () => {
         {
           src: 'src/assets/scss/*',
           dest: 'dist/scss-multiple',
-          rename: (name, extension) => (
-            extension
-              ? `${name}-renamed.${extension}`
-              : `${name}-renamed`
-          )
+          rename: (name, extension) => (extension ? `${name}-renamed.${extension}` : `${name}-renamed`)
         }
       ],
       verbose: true
@@ -330,37 +367,57 @@ describe('Options', () => {
 
     expect(console.log).toHaveBeenCalledTimes(5)
     expect(console.log).toHaveBeenCalledWith(green('copied:'))
-    expect(console.log).toHaveBeenCalledWith(`${green(`  ${bold('src/assets/asset-1.js')} → ${bold('dist/asset-1-renamed.js')}`)} ${yellow('[R]')}`)
-    expect(console.log).toHaveBeenCalledWith(`${green(`  ${bold('src/assets/scss/scss-1.scss')} → ${bold('dist/scss-multiple/scss-1-renamed.scss')}`)} ${yellow('[R]')}`)
-    expect(console.log).toHaveBeenCalledWith(`${green(`  ${bold('src/assets/scss/scss-2.scss')} → ${bold('dist/scss-multiple/scss-2-renamed.scss')}`)} ${yellow('[R]')}`)
-    expect(console.log).toHaveBeenCalledWith(`${green(`  ${bold('src/assets/scss/nested')} → ${bold('dist/scss-multiple/nested-renamed')}`)} ${yellow('[R]')}`)
+    expect(console.log).toHaveBeenCalledWith(
+      `${green(`  ${bold('src/assets/asset-1.js')} → ${bold('dist/asset-1-renamed.js')}`)} ${yellow('[R]')}`
+    )
+    expect(console.log).toHaveBeenCalledWith(
+      `${green(
+        `  ${bold('src/assets/scss/scss-1.scss')} → ${bold('dist/scss-multiple/scss-1-renamed.scss')}`
+      )} ${yellow('[R]')}`
+    )
+    expect(console.log).toHaveBeenCalledWith(
+      `${green(
+        `  ${bold('src/assets/scss/scss-2.scss')} → ${bold('dist/scss-multiple/scss-2-renamed.scss')}`
+      )} ${yellow('[R]')}`
+    )
+    expect(console.log).toHaveBeenCalledWith(
+      `${green(`  ${bold('src/assets/scss/nested')} → ${bold('dist/scss-multiple/nested-renamed')}`)} ${yellow('[R]')}`
+    )
   })
 
   test('Verbose, transform files', async () => {
     console.log = jest.fn()
 
     await build({
-      targets: [{
-        src: 'src/assets/css/css-*.css',
-        dest: 'dist',
-        transform: (contents) => contents.toString().replace('background-color', 'color')
-      }],
+      targets: [
+        {
+          src: 'src/assets/css/css-*.css',
+          dest: 'dist',
+          transform: (contents) => contents.toString().replace('background-color', 'color')
+        }
+      ],
       verbose: true
     })
 
     expect(console.log).toHaveBeenCalledTimes(3)
     expect(console.log).toHaveBeenCalledWith(green('copied:'))
-    expect(console.log).toHaveBeenCalledWith(`${green(`  ${bold('src/assets/css/css-1.css')} → ${bold('dist/css-1.css')}`)} ${yellow('[T]')}`)
-    expect(console.log).toHaveBeenCalledWith(`${green(`  ${bold('src/assets/css/css-2.css')} → ${bold('dist/css-2.css')}`)} ${yellow('[T]')}`)
+    expect(console.log).toHaveBeenCalledWith(
+      `${green(`  ${bold('src/assets/css/css-1.css')} → ${bold('dist/css-1.css')}`)} ${yellow('[T]')}`
+    )
+    expect(console.log).toHaveBeenCalledWith(
+      `${green(`  ${bold('src/assets/css/css-2.css')} → ${bold('dist/css-2.css')}`)} ${yellow('[T]')}`
+    )
   })
   /* eslint-enable no-console */
 
   test('Hook', async () => {
     await build({
-      targets: [{
-        src: ['src/assets/asset-1.js', 'src/assets/css'],
-        dest: 'dist'
-      }],
+      targets: [
+        {
+          src: ['src/assets/asset-1.js', 'src/assets/css'],
+          dest: 'dist'
+        }
+      ],
       hook: 'buildStart'
     })
 
@@ -379,9 +436,7 @@ describe('Options', () => {
       },
       plugins: [
         copy({
-          targets: [
-            { src: 'src/assets/asset-1.js', dest: 'dist' }
-          ],
+          targets: [{ src: 'src/assets/asset-1.js', dest: 'dist' }],
           copyOnce: true
         })
       ]
@@ -416,22 +471,21 @@ describe('Options', () => {
 
   test('Flatten', async () => {
     await build({
-      targets: [{
-        src: [
-          'src/assets/asset-1.js',
-          'src/assets/asset-2.js'
-        ],
-        dest: 'dist'
-      },
-      {
-        src: 'src/**/*.css',
-        dest: 'dist'
-      },
-      {
-        src: '**/*.scss',
-        dest: 'dist',
-        rename: (name, extension) => `${name}-renamed.${extension}`
-      }],
+      targets: [
+        {
+          src: ['src/assets/asset-1.js', 'src/assets/asset-2.js'],
+          dest: 'dist'
+        },
+        {
+          src: 'src/**/*.css',
+          dest: 'dist'
+        },
+        {
+          src: '**/*.scss',
+          dest: 'dist',
+          rename: (name, extension) => `${name}-renamed.${extension}`
+        }
+      ],
       flatten: false
     })
 
@@ -446,9 +500,7 @@ describe('Options', () => {
 
   test('Rest options', async () => {
     await build({
-      targets: [
-        { src: 'src/assets/asset-1.js', dest: 'dist' }
-      ],
+      targets: [{ src: 'src/assets/asset-1.js', dest: 'dist' }],
       ignore: ['**/asset-1.js']
     })
 
@@ -457,9 +509,7 @@ describe('Options', () => {
 
   test('Rest target options', async () => {
     await build({
-      targets: [
-        { src: 'src/assets/asset-1.js', dest: 'dist', ignore: ['**/asset-1.js'] }
-      ]
+      targets: [{ src: 'src/assets/asset-1.js', dest: 'dist', ignore: ['**/asset-1.js'] }]
     })
 
     expect(await fs.pathExists('dist/asset-1.js')).toBe(false)
