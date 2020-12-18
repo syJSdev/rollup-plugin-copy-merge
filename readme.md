@@ -1,25 +1,24 @@
-# rollup-plugin-copy
+# rollup-plugin-copy-merge
 
-[![Build Status](https://travis-ci.org/vladshcherbin/rollup-plugin-copy.svg?branch=master)](https://travis-ci.org/vladshcherbin/rollup-plugin-copy)
-[![Codecov](https://codecov.io/gh/vladshcherbin/rollup-plugin-copy/branch/master/graph/badge.svg)](https://codecov.io/gh/vladshcherbin/rollup-plugin-copy)
-
-Copy files and folders, with glob support.
+Copy & Merge files and folders, with glob support.
+This plugin is extended [rollup-plugin-copy](https://github.com/syJSdev/rollup-plugin-copy) plugin which support the merge functionality.
+Thanks [#vladshcherbin](https://github.com/vladshcherbin)
 
 ## Installation
 
 ```bash
 # yarn
-yarn add rollup-plugin-copy -D
+yarn add git+https://github.com/syJSdev/rollup-plugin-copy-merge.git -D
 
 # npm
-npm install rollup-plugin-copy -D
+npm i git+https://github.com/syJSdev/rollup-plugin-copy-merge.git -D
 ```
 
 ## Usage
 
 ```js
 // rollup.config.js
-import copy from 'rollup-plugin-copy'
+import copy from 'rollup-plugin-copy-merge'
 
 export default {
   input: 'src/index.js',
@@ -33,6 +32,7 @@ export default {
         { src: 'src/index.html', dest: 'dist/public' },
         { src: ['assets/fonts/arial.woff', 'assets/fonts/arial.woff2'], dest: 'dist/public/fonts' },
         { src: 'assets/images/**/*', dest: 'dist/public/images' }
+        { src: 'assets/js/*.js', file: 'dist/public/scripts.js' },
       ]
     })
   ]
@@ -51,10 +51,26 @@ Array of targets to copy. A target is an object with properties:
 
 - **src** (`string` `Array`): Path or glob of what to copy
 - **dest** (`string` `Array`): One or more destinations where to copy
+- **file** (`string`): destination file where to copy. all source files will merge into this file. should set dest or file.
 - **rename** (`string` `Function`): Change destination file or folder name
 - **transform** (`Function`): Modify file contents
 
 Each object should have **src** and **dest** properties, **rename** and **transform** are optional. [globby](https://github.com/sindresorhus/globby) is used inside, check it for [glob pattern](https://github.com/sindresorhus/globby#globbing-patterns) examples.
+
+#### Merge (extended)
+
+Can merge using file attribute.
+
+```js
+copy({
+  targets: [
+    { src: 'assets/js/*.js', file: 'dist/public/scripts1.js' },
+    { src: ['assets/umd/*.js', 'assets/iife/*.js'], file: 'dist/public/scripts2.js' }
+    { src: ['assets/umd/index.js', 'assets/iife/index.js'], file: 'dist/public/scripts3.js' }
+  ],
+  flatten: false
+})
+```
 
 ##### File
 
@@ -127,11 +143,13 @@ copy({
 
 ```js
 copy({
-  targets: [{
-    src: 'assets/docs/*',
-    dest: 'dist/public/docs',
-    rename: (name, extension) => `${name}-v1.${extension}`
-  }]
+  targets: [
+    {
+      src: 'assets/docs/*',
+      dest: 'dist/public/docs',
+      rename: (name, extension) => `${name}-v1.${extension}`
+    }
+  ]
 })
 ```
 
@@ -139,11 +157,13 @@ copy({
 
 ```js
 copy({
-  targets: [{
-    src: 'src/index.html',
-    dest: 'dist/public',
-    transform: (contents) => contents.toString().replace('__SCRIPT__', 'app.js')
-  }]
+  targets: [
+    {
+      src: 'src/index.html',
+      dest: 'dist/public',
+      transform: (contents) => contents.toString().replace('__SCRIPT__', 'app.js')
+    }
+  ]
 })
 ```
 
@@ -200,12 +220,14 @@ copy({
 ```
 
 All other options are passed to packages, used inside:
-  - [globby](https://github.com/sindresorhus/globby)
-  - [fs-extra copy function](https://github.com/jprichardson/node-fs-extra/blob/7.0.0/docs/copy.md)
+
+- [globby](https://github.com/sindresorhus/globby)
+- [fs-jetpack copy function](https://github.com/szwacz/fs-jetpack)
 
 ## Original Author
 
 [Cédric Meuter](https://github.com/meuter)
+[Vlad Shcherbin](https://github.com/vladshcherbin)
 
 ## License
 

@@ -10,8 +10,15 @@ interface Target extends globby.GlobbyOptions {
 
     /**
      * One or more destinations where to copy.
+     * Should set "dest" or "file" param.
      */
-    readonly dest: string | readonly string[];
+    readonly dest?: string | readonly string[];
+
+    /**
+     * Destination file.
+     * If this param is set, the "dest", "rename" and "flatten" params will be ignored.
+     */
+    readonly file?: string;
 
     /**
      * Change destination file or folder name.
