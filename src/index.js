@@ -1,10 +1,10 @@
-import path from 'path'
-import fs from 'fs-extra'
-import isObject from 'is-plain-object'
-import globby from 'globby'
 import { bold, green, yellow } from 'colorette'
-
+import fs from 'fs-extra'
+import globby from 'globby'
+import isObject from 'is-plain-object'
+import path from 'path'
 import { ensureTrailingNewLine, stringify } from './utils'
+
 
 async function isFile(filePath) {
   const fileStats = await fs.stat(filePath)
@@ -96,6 +96,7 @@ export default function copy(options = {}) {
     hook = 'buildEnd',
     targets = [],
     verbose = false,
+    prevent = false,
     ...restPluginOptions
   } = options
 
@@ -103,7 +104,11 @@ export default function copy(options = {}) {
 
   return {
     name: 'copy',
-    [hook]: async () => {
+    [hook]: async function hook () {
+      if (typeof prevent === "function" && prevent(this, targets)) {
+        return
+      }
+
       if (copyOnce && copied) {
         return
       }
