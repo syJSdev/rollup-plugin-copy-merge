@@ -10,37 +10,41 @@
   "scripts": {
     "clean": "rimraf coverage dist",
     "build": "rollup -c",
-    "lint": "eslint src tests",
+    "lint": "eslint *.js",
+    "format": "prettier --write .",
+    "lint:staged": "lint-staged",
     "postpublish": "yarn clean",
     "prepublishOnly": "yarn lint && yarn test && yarn clean && yarn build",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "is-ci || husky install"
   },
   "dependencies": {
-    "@types/fs-extra": "^8.0.1",
-    "colorette": "^1.1.0",
-    "fs-extra": "^9.0.0",
-    "globby": "10.0.1",
-    "is-plain-object": "^3.0.0"
+    "@types/fs-extra": "^9.0.13",
+    "colorette": "^2.0.17",
+    "fs-extra": "^10.1.0",
+    "globby": "13.1.1",
+    "is-plain-object": "^5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.3",
     "@babel/preset-env": "^7.8.3",
-    "babel-jest": "^24.9.0",
+    "@rollup/plugin-babel": "^5.3.1",
+    "babel-jest": "^28.1.0",
     "codecov": "^3.6.1",
-    "eslint": "^7.15.0",
-    "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-config-prettier": "^7.0.0",
+    "eslint": "^8.17.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-prettier": "^3.3.0",
-    "husky": "^4.3.6",
-    "jest": "^24.9.0",
-    "lint-staged": "^10.5.3",
+    "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^8.0.0",
+    "is-ci": "^3.0.1",
+    "jest": "^28.1.0",
+    "lint-staged": "^13.0.0",
     "prettier": "^2.2.1",
-    "replace-in-file": "^5.0.2",
+    "replace-in-file": "^6.3.5",
     "rimraf": "^3.0.0",
-    "rollup": "^1.29.0",
+    "rollup": "^2.75.5",
     "rollup-plugin-auto-external": "^2.0.0",
-    "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-includepaths": "^0.2.4"
   },
   "files": [
@@ -48,21 +52,8 @@
     "index.d.ts",
     "readme.md"
   ],
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.{js,ts,tsx}": [
-      "eslint --quiet --fix"
-    ],
-    "*.{json,md,html}": [
-      "prettier --write"
-    ]
-  },
   "engines": {
-    "node": ">=10.12"
+    "node": ">=14"
   },
   "keywords": [
     "rollup",
