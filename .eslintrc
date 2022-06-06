@@ -2,10 +2,6 @@
   "extends": ["airbnb-base", "prettier"],
   "plugins": ["prettier", "import"],
   "rules": {
-    "comma-dangle": ["error", "never"],
-    "object-curly-newline": ["error", { "multiline": true, "consistent": true }],
-    "semi": ["error", "never"],
-    "object-shorthand": ["off"],
     "no-console": ["off"],
     "no-await-in-loop": ["off"],
     "prettier/prettier": ["error"]
