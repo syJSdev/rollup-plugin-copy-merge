@@ -1,5 +1,5 @@
-import util from 'util'
+import util from 'util';
 
 export default function stringify(value) {
-  return util.inspect(value, { breakLength: Infinity })
+  return util.inspect(value, { breakLength: Infinity });
 }

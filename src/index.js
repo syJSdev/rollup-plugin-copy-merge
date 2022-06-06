@@ -1,92 +1,92 @@
-import path from 'path'
-import fs from 'fs-extra'
-import isObject from 'is-plain-object'
-import globby from 'globby'
-import { bold, green, yellow } from 'colorette'
+import path from 'path';
+import fs from 'fs-extra';
+import isObject from 'is-plain-object';
+import globby from 'globby';
+import { bold, green, yellow } from 'colorette';
 
-import { ensureTrailingNewLine, stringify } from './utils'
+import { ensureTrailingNewLine, stringify } from './utils';
 
 async function isFile(filePath) {
-  const fileStats = await fs.stat(filePath)
+  const fileStats = await fs.stat(filePath);
 
-  return fileStats.isFile()
+  return fileStats.isFile();
 }
 
 function renameTarget(target, rename) {
-  const parsedPath = path.parse(target)
+  const parsedPath = path.parse(target);
 
   return typeof rename === 'string'
     ? rename
-    : rename(parsedPath.name, parsedPath.ext.replace('.', ''))
+    : rename(parsedPath.name, parsedPath.ext.replace('.', ''));
 }
 
 async function generateCopyTarget(src, dest, file, { flatten, rename, transform }) {
   if (!(await isFile(src))) {
     if (transform) {
-      throw new Error(`"transform" option works only on files: '${src}' must be a file`)
+      throw new Error(`"transform" option works only on files: '${src}' must be a file`);
     }
     if (file) {
-      throw new Error(`"file" option works only on files: '${src}' must be a file`)
+      throw new Error(`"file" option works only on files: '${src}' must be a file`);
     }
   }
 
-  const { base, dir } = path.parse(src)
-  let destination
+  const { base, dir } = path.parse(src);
+  let destination;
   if (file) {
     // ignore the dest, flatten and rename
-    destination = file
+    destination = file;
   } else {
-    destination = flatten || (!flatten && !dir) ? dest : dir.replace(dir.split('/')[0], dest)
-    destination = path.join(destination, rename ? renameTarget(base, rename) : base)
+    destination = flatten || (!flatten && !dir) ? dest : dir.replace(dir.split('/')[0], dest);
+    destination = path.join(destination, rename ? renameTarget(base, rename) : base);
   }
-  let contents
+  let contents;
   if (file || transform) {
-    contents = await fs.readFile(src, 'utf-8')
+    contents = await fs.readFile(src, 'utf-8');
     if (transform) {
-      contents = await transform(contents)
+      contents = await transform(contents);
     }
   }
 
   return {
-    src: src,
+    src,
     dest: destination,
-    contents: contents,
+    contents,
     renamed: !!rename,
     transformed: !!transform,
     merge: !!file
-  }
+  };
 }
 /* eslint no-param-reassign: ["error", { "props": false }] */
 function concatContents(targets) {
-  const dests = []
-  const indexes = []
+  const dests = [];
+  const indexes = [];
   for (let index = 0; index < targets.length; index += 1) {
     if (targets[index].merge) {
-      const i = dests.indexOf(targets[index].dest)
+      const i = dests.indexOf(targets[index].dest);
       if (i >= 0) {
-        const mergeIndex = indexes[i]
+        const mergeIndex = indexes[i];
 
-        const target = targets[mergeIndex]
-        target.contents = ensureTrailingNewLine(target.contents).concat(targets[index].contents)
-        delete targets[index].contents
-        delete targets[index].merge
+        const target = targets[mergeIndex];
+        target.contents = ensureTrailingNewLine(target.contents).concat(targets[index].contents);
+        delete targets[index].contents;
+        delete targets[index].merge;
       } else {
-        dests.push(targets[index].dest)
-        indexes.push(index)
+        dests.push(targets[index].dest);
+        indexes.push(index);
       }
-      targets[index].merged = true
+      targets[index].merged = true;
     }
   }
 
-  return targets
+  return targets;
 }
 /* eslint no-param-reassign: ["error"] */
 
 async function generateCopyTargets(srcs, dest, file, { flatten, rename, transform }) {
   const targets = await Promise.all(
     srcs.map((src) => generateCopyTarget(src, dest, file, { flatten, rename, transform }))
-  )
-  return concatContents(targets)
+  );
+  return concatContents(targets);
 }
 
 export default function copy(options = {}) {
@@ -97,36 +97,36 @@ export default function copy(options = {}) {
     targets = [],
     verbose = false,
     ...restPluginOptions
-  } = options
+  } = options;
 
-  let copied = false
+  let copied = false;
 
   return {
     name: 'copy',
     [hook]: async () => {
       if (copyOnce && copied) {
-        return
+        return;
       }
 
-      const copyTargets = []
+      const copyTargets = [];
 
       if (Array.isArray(targets) && targets.length) {
         for (let index = 0; index < targets.length; index += 1) {
-          const target = targets[index]
+          const target = targets[index];
           if (!isObject(target)) {
-            throw new Error(`${stringify(target)} target must be an object`)
+            throw new Error(`${stringify(target)} target must be an object`);
           }
 
-          const { dest, rename, src, transform, file, ...restTargetOptions } = target
+          const { dest, rename, src, transform, file, ...restTargetOptions } = target;
 
           if (!src || (!dest && !file)) {
-            throw new Error(`${stringify(target)} target must have "src" and "dest" properties`)
+            throw new Error(`${stringify(target)} target must have "src" and "dest" properties`);
           }
 
           if (rename && typeof rename !== 'string' && typeof rename !== 'function') {
             throw new Error(
               `${stringify(target)} target's "rename" property must be a string or a function`
-            )
+            );
           }
 
           const matchedPaths = await globby(src, {
@@ -134,7 +134,7 @@ export default function copy(options = {}) {
             onlyFiles: false,
             ...restPluginOptions,
             ...restTargetOptions
-          })
+          });
 
           if (matchedPaths.length) {
             if (Array.isArray(dest)) {
@@ -146,17 +146,17 @@ export default function copy(options = {}) {
                     transform
                   })
                 )
-              )
+              );
               targetsList.forEach((ts) => {
-                copyTargets.push(...ts)
-              })
+                copyTargets.push(...ts);
+              });
             } else {
               const ts = await generateCopyTargets(matchedPaths, dest, file, {
                 flatten,
                 rename,
                 transform
-              })
-              copyTargets.push(...ts)
+              });
+              copyTargets.push(...ts);
             }
           }
         }
@@ -164,39 +164,39 @@ export default function copy(options = {}) {
 
       if (copyTargets.length) {
         if (verbose) {
-          console.log(green('copied:'))
+          console.log(green('copied:'));
         }
 
         for (let index = 0; index < copyTargets.length; index += 1) {
-          const copyTarget = copyTargets[index]
-          const { src, contents, transformed, merge, merged, dest } = copyTarget
+          const copyTarget = copyTargets[index];
+          const { src, contents, transformed, merge, merged, dest } = copyTarget;
 
           if (transformed) {
-            await fs.outputFile(dest, contents)
+            await fs.outputFile(dest, contents);
           } else if (merged) {
-            if (merge) await fs.outputFile(dest, contents)
+            if (merge) await fs.outputFile(dest, contents);
           } else {
-            await fs.copy(src, dest, restPluginOptions)
+            await fs.copy(src, dest, restPluginOptions);
           }
 
           if (verbose) {
-            let message = green(`  ${bold(src)} → ${bold(dest)}`)
+            let message = green(`  ${bold(src)} → ${bold(dest)}`);
             const flags = Object.entries(copyTarget)
               .filter(([key, value]) => ['renamed', 'transformed', 'merged'].includes(key) && value)
-              .map(([key]) => key.charAt(0).toUpperCase())
+              .map(([key]) => key.charAt(0).toUpperCase());
 
             if (flags.length) {
-              message = `${message} ${yellow(`[${flags.join(', ')}]`)}`
+              message = `${message} ${yellow(`[${flags.join(', ')}]`)}`;
             }
 
-            console.log(message)
+            console.log(message);
           }
         }
       } else if (verbose) {
-        console.log(yellow('no items to copy'))
+        console.log(yellow('no items to copy'));
       }
 
-      copied = true
+      copied = true;
     }
-  }
+  };
 }
