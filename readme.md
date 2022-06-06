@@ -1,5 +1,7 @@
 # rollup-plugin-copy-merge
 
+![GitHub](https://img.shields.io/github/license/syJSdev/rollup-plugin-copy-merge)
+[![npm](https://img.shields.io/npm/v/rollup-plugin-copy-merge)](https://www.npmjs.com/package/rollup-plugin-copy-merge)
 [![build](https://travis-ci.com/syJSdev/rollup-plugin-copy-merge.svg?branch=main)](https://travis-ci.com/github/syJSdev/rollup-plugin-copy-merge)
 [![codecov](https://codecov.io/gh/syJSdev/rollup-plugin-copy-merge/branch/main/graph/badge.svg?token=RMODCAC64I)](https://codecov.io/gh/syJSdev/rollup-plugin-copy-merge)
 
@@ -11,10 +13,10 @@ Thanks [#vladshcherbin](https://github.com/vladshcherbin)
 
 ```bash
 # yarn
-yarn add git+https://github.com/syJSdev/rollup-plugin-copy-merge.git -D
+yarn add rollup-plugin-copy-merge --dev
 
 # npm
-npm i git+https://github.com/syJSdev/rollup-plugin-copy-merge.git -D
+npm i rollup-plugin-copy-merge --save-dev
 ```
 
 ## Usage
@@ -80,7 +82,7 @@ copy({
 ```js
 copy({
   targets: [{ src: 'src/index.html', dest: 'dist/public' }]
-})
+});
 ```
 
 ##### Folder
@@ -88,7 +90,7 @@ copy({
 ```js
 copy({
   targets: [{ src: 'assets/images', dest: 'dist/public' }]
-})
+});
 ```
 
 ##### Glob
@@ -96,7 +98,7 @@ copy({
 ```js
 copy({
   targets: [{ src: 'assets/*', dest: 'dist/public' }]
-})
+});
 ```
 
 ##### Glob: multiple items
@@ -104,7 +106,7 @@ copy({
 ```js
 copy({
   targets: [{ src: ['src/index.html', 'src/styles.css', 'assets/images'], dest: 'dist/public' }]
-})
+});
 ```
 
 ##### Glob: negated patterns
@@ -112,7 +114,7 @@ copy({
 ```js
 copy({
   targets: [{ src: ['assets/images/**/*', '!**/*.gif'], dest: 'dist/public/images' }]
-})
+});
 ```
 
 ##### Multiple targets
@@ -123,7 +125,7 @@ copy({
     { src: 'src/index.html', dest: 'dist/public' },
     { src: 'assets/images/**/*', dest: 'dist/public/images' }
   ]
-})
+});
 ```
 
 ##### Multiple destinations
@@ -131,7 +133,7 @@ copy({
 ```js
 copy({
   targets: [{ src: 'src/index.html', dest: ['dist/public', 'build/public'] }]
-})
+});
 ```
 
 ##### Rename with a string
@@ -139,7 +141,7 @@ copy({
 ```js
 copy({
   targets: [{ src: 'src/app.html', dest: 'dist/public', rename: 'index.html' }]
-})
+});
 ```
 
 ##### Rename with a function
@@ -153,7 +155,7 @@ copy({
       rename: (name, extension) => `${name}-v1.${extension}`
     }
   ]
-})
+});
 ```
 
 ##### Transform file contents
@@ -167,7 +169,7 @@ copy({
       transform: (contents) => contents.toString().replace('__SCRIPT__', 'app.js')
     }
   ]
-})
+});
 ```
 
 #### verbose
@@ -180,7 +182,7 @@ Output copied items to console.
 copy({
   targets: [{ src: 'assets/*', dest: 'dist/public' }],
   verbose: true
-})
+});
 ```
 
 #### hook
@@ -193,7 +195,7 @@ Type: `string` | Default: `buildEnd`
 copy({
   targets: [{ src: 'assets/*', dest: 'dist/public' }],
   hook: 'writeBundle'
-})
+});
 ```
 
 #### copyOnce
@@ -206,7 +208,7 @@ Copy items once. Useful in watch mode.
 copy({
   targets: [{ src: 'assets/*', dest: 'dist/public' }],
   copyOnce: true
-})
+});
 ```
 
 #### flatten
@@ -219,7 +221,7 @@ Remove the directory structure of copied files.
 copy({
   targets: [{ src: 'assets/**/*', dest: 'dist/public' }],
   flatten: false
-})
+});
 ```
 
 All other options are passed to packages, used inside:
