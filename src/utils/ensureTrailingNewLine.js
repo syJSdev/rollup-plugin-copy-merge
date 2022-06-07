@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 
 export default function ensureTrailingNewLine(contents) {
   if (!contents.endsWith(os.EOL)) return contents + os.EOL;

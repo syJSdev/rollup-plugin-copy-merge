@@ -1,6 +1,6 @@
-import path from 'path';
+import path from 'node:path';
 import fs from 'fs-extra';
-import isObject from 'is-plain-object';
+import { isPlainObject } from 'is-plain-object';
 import globby from 'globby';
 import { bold, green, yellow } from 'colorette';
 
@@ -56,6 +56,7 @@ async function generateCopyTarget(src, dest, file, { flatten, rename, transform 
     merge: !!file
   };
 }
+
 /* eslint no-param-reassign: ["error", { "props": false }] */
 function concatContents(targets) {
   const dests = [];
@@ -113,7 +114,7 @@ export default function copy(options = {}) {
       if (Array.isArray(targets) && targets.length) {
         for (let index = 0; index < targets.length; index += 1) {
           const target = targets[index];
-          if (!isObject(target)) {
+          if (!isPlainObject(target)) {
             throw new Error(`${stringify(target)} target must be an object`);
           }
 

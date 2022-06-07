@@ -1,7 +1,14 @@
 language: node_js
 node_js:
   - 14
-  - 16
-  - 18
 script:
   - jest --ci --coverage && codecov
+before_deploy:
+  - npm run build
+deploy:
+  - provider: npm
+    email: $NPM_USER_EMAIL
+    api_key: $NPM_USER_KEY
+    skip_cleanup: true
+    on:
+      tags: true

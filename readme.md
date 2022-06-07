@@ -6,7 +6,7 @@
 [![codecov](https://codecov.io/gh/syJSdev/rollup-plugin-copy-merge/branch/main/graph/badge.svg?token=RMODCAC64I)](https://codecov.io/gh/syJSdev/rollup-plugin-copy-merge)
 
 Copy & Merge files and folders, with glob support.
-This plugin is extended [rollup-plugin-copy](https://github.com/syJSdev/rollup-plugin-copy) plugin which support the merge functionality.
+This plugin is extended [rollup-plugin-copy](https://github.com/vladshcherbin/rollup-plugin-copy) plugin which support the merge functionality.
 Thanks [#vladshcherbin](https://github.com/vladshcherbin)
 
 ## Installation

@@ -1,13 +1,11 @@
 import { rollup, watch } from 'rollup';
 import fs from 'fs-extra';
 import replace from 'replace-in-file';
-import { bold, green, yellow, options } from 'colorette';
+import { bold, green, yellow } from 'colorette';
 import copy from '../src';
 import { ensureTrailingNewLine } from '../src/utils';
 
 process.chdir(`${__dirname}/fixtures`);
-
-options.enabled = true;
 
 function sleep(ms) {
   return new Promise((resolve) => {

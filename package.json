@@ -1,7 +1,7 @@
 {
   "name": "rollup-plugin-copy-merge",
   "description": "Copy & Merge files and folders using Rollup",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "syJSdev <whitedragon226@gmail.com>",
   "repository": "syJSdev/rollup-plugin-copy-merge",
   "main": "dist/index.commonjs.js",
@@ -22,14 +22,15 @@
     "@types/fs-extra": "^9.0.13",
     "colorette": "^2.0.17",
     "fs-extra": "^10.1.0",
-    "globby": "13.1.1",
+    "globby": "11.0.4",
     "is-plain-object": "^5.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.8.3",
-    "@babel/preset-env": "^7.8.3",
+    "@babel/core": "^7.18.2",
+    "@babel/preset-env": "^7.18.2",
     "@rollup/plugin-babel": "^5.3.1",
-    "babel-jest": "^28.1.0",
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
     "codecov": "^3.6.1",
     "eslint": "^8.17.0",
     "eslint-config-airbnb-base": "^15.0.0",
@@ -44,8 +45,7 @@
     "replace-in-file": "^6.3.5",
     "rimraf": "^3.0.0",
     "rollup": "^2.75.5",
-    "rollup-plugin-auto-external": "^2.0.0",
-    "rollup-plugin-includepaths": "^0.2.4"
+    "rollup-plugin-filesize": "^9.1.2"
   },
   "files": [
     "dist",
