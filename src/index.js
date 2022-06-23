@@ -1,8 +1,9 @@
 import path from 'node:path';
-import fs from 'fs-extra';
-import { isPlainObject } from 'is-plain-object';
-import globby from 'globby';
+
 import { bold, green, yellow } from 'colorette';
+import fs from 'fs-extra';
+import globby from 'globby';
+import { isPlainObject } from 'is-plain-object';
 
 import { ensureTrailingNewLine, stringify } from './utils';
 

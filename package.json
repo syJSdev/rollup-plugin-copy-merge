@@ -1,7 +1,7 @@
 {
   "name": "rollup-plugin-copy-merge",
   "description": "Copy & Merge files and folders using Rollup",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": "syJSdev <whitedragon226@gmail.com>",
   "repository": "syJSdev/rollup-plugin-copy-merge",
   "main": "dist/index.commonjs.js",
@@ -16,7 +16,9 @@
     "postpublish": "yarn clean",
     "prepublishOnly": "yarn lint && yarn test && yarn clean && yarn build",
     "test": "jest",
-    "postinstall": "is-ci || husky install"
+    "postinstall": "is-ci || husky install",
+    "prepack": "pinst --disable",
+    "postpack": "pinst --enable"
   },
   "dependencies": {
     "@types/fs-extra": "^9.0.13",
@@ -41,6 +43,7 @@
     "is-ci": "^3.0.1",
     "jest": "^28.1.0",
     "lint-staged": "^13.0.0",
+    "pinst": "^3.0.0",
     "prettier": "^2.2.1",
     "replace-in-file": "^6.3.5",
     "rimraf": "^3.0.0",
