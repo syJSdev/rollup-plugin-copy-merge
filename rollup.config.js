@@ -12,12 +12,12 @@ export default {
   external: [...Object.keys(pkg.dependencies), 'path'],
   output: [
     {
-      file: 'dist/index.commonjs.js',
+      file: pkg.main,
       format: 'commonjs',
       exports: 'auto'
     },
     {
-      file: 'dist/index.module.js',
+      file: pkg.module,
       format: 'module',
       exports: 'auto'
     }

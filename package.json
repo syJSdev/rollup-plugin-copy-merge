@@ -1,7 +1,7 @@
 {
   "name": "rollup-plugin-copy-merge",
   "description": "Copy & Merge files and folders using Rollup",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "author": "syJSdev <whitedragon226@gmail.com>",
   "repository": "syJSdev/rollup-plugin-copy-merge",
   "main": "dist/index.commonjs.js",
@@ -21,7 +21,6 @@
     "postpack": "pinst --enable"
   },
   "dependencies": {
-    "@types/fs-extra": "^9.0.13",
     "colorette": "^2.0.17",
     "fs-extra": "^10.1.0",
     "globby": "11.0.4",
