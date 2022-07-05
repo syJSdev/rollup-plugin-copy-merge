@@ -1,4 +1,4 @@
-import path from 'node:path';
+import path from 'path';
 
 import { babel } from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
