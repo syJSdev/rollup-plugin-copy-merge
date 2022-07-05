@@ -1,7 +1,8 @@
-import { rollup, watch } from 'rollup';
+import { bold, green, yellow } from 'colorette';
 import fs from 'fs-extra';
 import replace from 'replace-in-file';
-import { bold, green, yellow } from 'colorette';
+import { rollup, watch } from 'rollup';
+
 import copy from '../src';
 import { ensureTrailingNewLine } from '../src/utils';
 
