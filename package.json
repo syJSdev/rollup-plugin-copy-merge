@@ -14,7 +14,7 @@
     "format": "prettier --write .",
     "lint:staged": "lint-staged",
     "postpublish": "yarn clean",
-    "prepublishOnly": "yarn lint && yarn test && yarn clean && yarn build",
+    "prepublishOnly": "yarn clean && yarn build",
     "test": "jest",
     "postinstall": "is-ci || husky install",
     "prepack": "pinst --disable",

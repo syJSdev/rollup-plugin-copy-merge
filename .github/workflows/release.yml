@@ -43,24 +43,12 @@ jobs:
           HUSKY_SKIP_INSTALL: true # Skip install of Husky
         run: yarn install --frozen-lockfile
 
-      # Clean
-      - name: Clean
-        run: yarn clean
-
-      # Lint
-      - name: Run eslint
-        run: yarn lint
-
       # Tests
       - name: Run tests
         run: yarn test
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
-
-      # Build
-      - name: Run build
-        run: yarn build
 
       # Configure Git
       - name: Git configuration
@@ -90,7 +78,7 @@ jobs:
 
       # Update changelog unreleased section with new version
       - name: Update changelog
-        uses: superfaceai/release-changelog-action@v1
+        uses: superfaceai/release-changelog-action@v2
         with:
           path-to-changelog: CHANGELOG.md
           version: ${{ env.NEW_VERSION }}
@@ -104,12 +92,6 @@ jobs:
           git commit -m "chore: release ${{ env.NEW_VERSION }}"
           git tag ${{ env.NEW_VERSION }}
 
-      # Publish version to public repository
-      - name: Publish
-        run: yarn publish --verbose --access public --tag ${{ env.RELEASE_TAG }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
-
       # Push repository changes
       - name: Push changes to repository
         env:
@@ -120,7 +102,7 @@ jobs:
       # Read version changelog
       - id: get-changelog
         name: Get version changelog
-        uses: superfaceai/release-changelog-action@v1
+        uses: superfaceai/release-changelog-action@v2
         with:
           path-to-changelog: CHANGELOG.md
           version: ${{ env.NEW_VERSION }}
@@ -135,3 +117,9 @@ jobs:
           prerelease: ${{ startsWith(github.event.inputs.release-type, 'pre') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Publish version to public repository
+      - name: Publish
+        run: yarn publish --verbose --access public --tag ${{ env.RELEASE_TAG }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
