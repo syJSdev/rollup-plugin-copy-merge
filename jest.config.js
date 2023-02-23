@@ -3,6 +3,7 @@
  * https://jestjs.io/docs/configuration
  */
 
+/** @type {import('jest').Config} */
 module.exports = {
   // Automatically clear mock calls, instances, contexts and results before every test
   clearMocks: true,
@@ -18,6 +19,9 @@ module.exports = {
 
   // Indicates whether each individual test should be reported during the run
   verbose: true,
+
+  // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
+  transformIgnorePatterns: ['/node_modules/(?!(is-plain-obj)/)', '\\.pnp\\.[^\\/]+$'],
 
   // An array of regexp patterns that are matched against all source file paths before re-running tests in watch mode
   watchPathIgnorePatterns: [
