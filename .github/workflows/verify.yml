@@ -10,7 +10,7 @@ on:
 
 jobs:
   verify:
-    name: 'PR: Verify'
+    name: Verify
     runs-on: ubuntu-latest
     env:
       CI: true
