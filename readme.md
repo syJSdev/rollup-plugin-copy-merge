@@ -1,8 +1,8 @@
 # rollup-plugin-copy-merge
 
-![GitHub](https://img.shields.io/github/license/syJSdev/rollup-plugin-copy-merge)
+![license](https://img.shields.io/github/license/syJSdev/rollup-plugin-copy-merge)
 [![npm](https://img.shields.io/npm/v/rollup-plugin-copy-merge)](https://www.npmjs.com/package/rollup-plugin-copy-merge)
-[![build](https://travis-ci.com/syJSdev/rollup-plugin-copy-merge.svg?branch=main)](https://travis-ci.com/github/syJSdev/rollup-plugin-copy-merge)
+[![release](https://github.com/syJSdev/rollup-plugin-copy-merge/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/syJSdev/rollup-plugin-copy-merge/actions/workflows/release.yml)
 [![codecov](https://codecov.io/gh/syJSdev/rollup-plugin-copy-merge/branch/main/graph/badge.svg?token=RMODCAC64I)](https://codecov.io/gh/syJSdev/rollup-plugin-copy-merge)
 
 Copy & Merge files and folders, with glob support.
