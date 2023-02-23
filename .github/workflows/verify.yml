@@ -7,25 +7,30 @@ on:
 
 jobs:
   verify:
-    name: Test and Build
+    name: 'PR: Verify'
     runs-on: ubuntu-latest
     env:
       CI: true
 
     steps:
       - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.8.0
+        uses: styfle/cancel-workflow-action@0.11.0
         with:
           access_token: ${{ github.token }}
 
-      - name: Checkout Repo
-        uses: actions/checkout@v2
+      # Checkout project repository
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - name: Setup Node
-        uses: actions/setup-node@v2.4.0
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 12
+          registry-url: https://registry.npmjs.org/
+          node-version: 14
+          cache: 'yarn'
 
+      # Install dependencies 
       - name: Install Dependencies
         env:
           HUSKY_SKIP_INSTALL: true # Skip install of Husky
@@ -33,10 +38,14 @@ jobs:
           yarn clean
           yarn install --frozen-lockfile
 
-      - name: Verify App
-        run: |
-          yarn lint
-          yarn test
-          yarn clean
-          yarn build
-          yarn codecov
+      # Lint
+      - name: Run eslint
+        run: yarn lint
+
+      # Tests
+      - name: Run tests
+        run: yarn test && yarn codecov
+
+      # Build
+      - name: Run build
+        run: yarn build
