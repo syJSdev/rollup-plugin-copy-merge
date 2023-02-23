@@ -1,7 +1,7 @@
 {
   "name": "rollup-plugin-copy-merge",
   "description": "Copy & Merge files and folders using Rollup",
-  "version": "0.3.5",
+  "version": "1.0.0-beta.0",
   "author": "syJSdev <whitedragon226@gmail.com>",
   "repository": "syJSdev/rollup-plugin-copy-merge",
   "main": "dist/index.js",
