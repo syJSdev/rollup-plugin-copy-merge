@@ -1,0 +1,42 @@
+name: Verify
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  verify:
+    name: Test and Build
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2.4.0
+        with:
+          node-version: 12
+
+      - name: Install Dependencies
+        env:
+          HUSKY_SKIP_INSTALL: true # Skip install of Husky
+        run: |
+          yarn clean
+          yarn install --frozen-lockfile
+
+      - name: Verify App
+        run: |
+          yarn lint
+          yarn test
+          yarn clean
+          yarn build
+          yarn codecov

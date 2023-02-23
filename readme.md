@@ -153,7 +153,7 @@ copy({
     {
       src: 'assets/docs/*',
       dest: 'dist/public/docs',
-      rename: (name, extension, fullPath) => `${name}-v1.${extension}`
+      rename: (name, extension, src_path) => `${name}-v1.${extension}`
     }
   ]
 });
@@ -167,7 +167,8 @@ copy({
     {
       src: 'src/index.html',
       dest: 'dist/public',
-      transform: (contents) => contents.toString().replace('__SCRIPT__', 'app.js')
+      transform: (contents, src_file_name, src_path) =>
+        contents.toString().replace('__SCRIPT__', 'app.js')
     }
   ]
 });
