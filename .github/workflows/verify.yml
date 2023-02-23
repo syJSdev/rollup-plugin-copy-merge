@@ -30,13 +30,15 @@ jobs:
           node-version: 14
           cache: 'yarn'
 
-      # Install dependencies 
+      # Install dependencies
       - name: Install Dependencies
         env:
           HUSKY_SKIP_INSTALL: true # Skip install of Husky
-        run: |
-          yarn clean
-          yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile
+
+      # Clean
+      - name: Clean
+        run: yarn clean
 
       # Lint
       - name: Run eslint
