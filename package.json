@@ -4,13 +4,13 @@
   "version": "0.3.6",
   "author": "syJSdev <whitedragon226@gmail.com>",
   "repository": "syJSdev/rollup-plugin-copy-merge",
-  "main": "dist/index.commonjs.js",
-  "module": "dist/index.module.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "index.d.ts",
   "scripts": {
     "clean": "rimraf coverage dist",
     "build": "rollup -c",
-    "lint": "eslint *.js",
+    "lint": "eslint **/*.js",
     "format": "prettier --write .",
     "lint:staged": "lint-staged",
     "postpublish": "yarn clean",
@@ -24,8 +24,8 @@
     "@types/fs-extra": "^9.0.13",
     "colorette": "^2.0.17",
     "fs-extra": "^10.1.0",
-    "globby": "11.0.4",
-    "is-plain-object": "^5.0.0"
+    "globby": "^11.1.0",
+    "is-plain-obj": "^4.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.18.2",
@@ -33,7 +33,7 @@
     "@rollup/plugin-babel": "^5.3.1",
     "@rollup/plugin-commonjs": "^22.0.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
-    "codecov": "^3.6.2",
+    "@types/babel__core": "^7.18.2",
     "eslint": "^8.17.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.5.0",
@@ -46,9 +46,15 @@
     "pinst": "^3.0.0",
     "prettier": "^2.2.1",
     "replace-in-file": "^6.3.5",
-    "rimraf": "^3.0.0",
+    "rimraf": "^3.0.2",
     "rollup": "^2.75.5",
     "rollup-plugin-filesize": "^9.1.2"
+  },
+  "peerDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "colorette": "^2.0.17",
+    "fs-extra": "^10.1.0",
+    "globby": "^11.1.0"
   },
   "files": [
     "dist",

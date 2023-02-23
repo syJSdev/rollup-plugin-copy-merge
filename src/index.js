@@ -3,22 +3,16 @@ import path from 'path';
 import { bold, green, yellow } from 'colorette';
 import fs from 'fs-extra';
 import globby from 'globby';
-import { isPlainObject } from 'is-plain-object';
+import isPlainObject from 'is-plain-obj';
 
-import { ensureTrailingNewLine, stringify } from './utils';
+import { ensureTrailingNewLine, stringify, isFile } from './utils';
 
-async function isFile(filePath) {
-  const fileStats = await fs.stat(filePath);
-
-  return fileStats.isFile();
-}
-
-function renameTarget(target, rename) {
+function renameTarget(target, rename, src) {
   const parsedPath = path.parse(target);
 
   return typeof rename === 'string'
     ? rename
-    : rename(parsedPath.name, parsedPath.ext.replace('.', ''));
+    : rename(parsedPath.name, parsedPath.ext.replace('.', ''), src);
 }
 
 async function generateCopyTarget(src, dest, file, { flatten, rename, transform }) {
@@ -38,13 +32,13 @@ async function generateCopyTarget(src, dest, file, { flatten, rename, transform 
     destination = file;
   } else {
     destination = flatten || (!flatten && !dir) ? dest : dir.replace(dir.split('/')[0], dest);
-    destination = path.join(destination, rename ? renameTarget(base, rename) : base);
+    destination = path.join(destination, rename ? renameTarget(base, rename, src) : base);
   }
   let contents;
   if (file || transform) {
     contents = await fs.readFile(src, 'utf-8');
     if (transform) {
-      contents = await transform(contents);
+      contents = await transform(contents, base, src);
     }
   }
 
@@ -91,7 +85,7 @@ async function generateCopyTargets(srcs, dest, file, { flatten, rename, transfor
   return concatContents(targets);
 }
 
-export default function copy(options = {}) {
+export default function copyMerge(options = {}) {
   const {
     copyOnce = false,
     flatten = true,
@@ -171,14 +165,14 @@ export default function copy(options = {}) {
 
         for (let index = 0; index < copyTargets.length; index += 1) {
           const copyTarget = copyTargets[index];
-          const { src, contents, transformed, merge, merged, dest } = copyTarget;
+          const { src, contents, transformed, merged, dest } = copyTarget;
 
           if (transformed) {
             await fs.outputFile(dest, contents);
           } else if (merged) {
-            if (merge) await fs.outputFile(dest, contents);
+            if (contents) await fs.outputFile(dest, contents);
           } else {
-            await fs.copy(src, dest, restPluginOptions);
+            await fs.copy(src, dest, { overwrite: true, errorOnExist: false, dereference: false });
           }
 
           if (verbose) {

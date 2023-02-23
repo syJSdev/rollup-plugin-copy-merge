@@ -7,9 +7,10 @@ import filesize from 'rollup-plugin-filesize';
 
 import pkg from './package.json';
 
+/** @type {import('rollup').RollupOptions} */
 export default {
   input: 'src/index.js',
-  external: [...Object.keys(pkg.dependencies), 'path'],
+  external: [...Object.keys(pkg.peerDependencies)],
   output: [
     {
       file: pkg.main,

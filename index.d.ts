@@ -23,12 +23,12 @@ interface Target extends globby.GlobbyOptions {
   /**
    * Change destination file or folder name.
    */
-  readonly rename?: string | Function;
+  readonly rename?: string | ((name: string, extension: string, fullPath: string) => string);
 
   /**
    * Modify file contents.
    */
-  readonly transform?: Function;
+  readonly transform?: (contents: Buffer, name: string) => any;
 }
 
 interface CopyOptions extends globby.GlobbyOptions, fs.CopyOptions {
@@ -66,4 +66,4 @@ interface CopyOptions extends globby.GlobbyOptions, fs.CopyOptions {
 /**
  * Copy files and folders using Rollup
  */
-export default function copy(options?: CopyOptions): rollup.Plugin;
+export default function copyMerge(options?: CopyOptions): rollup.Plugin;

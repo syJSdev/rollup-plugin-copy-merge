@@ -1,9 +1,11 @@
+import path from 'path';
+
 import { bold, green, yellow } from 'colorette';
 import fs from 'fs-extra';
 import replace from 'replace-in-file';
 import { rollup, watch } from 'rollup';
 
-import copy from '../src';
+import copyMerge from '../src';
 import { ensureTrailingNewLine } from '../src/utils';
 
 process.chdir(`${__dirname}/fixtures`);
@@ -14,14 +16,14 @@ function sleep(ms) {
   });
 }
 
-function readFile(path) {
-  return fs.readFile(path, 'utf-8');
+function readFile(filePath) {
+  return fs.readFile(filePath, 'utf-8');
 }
 
 async function build(pluginOptions) {
   await rollup({
     input: 'src/index.js',
-    plugins: [copy(pluginOptions)]
+    plugins: [copyMerge(pluginOptions)]
   });
 }
 
@@ -206,6 +208,11 @@ describe('Copy', () => {
           dest: 'dist/scss-multiple',
           rename: (name, extension) =>
             extension ? `${name}-renamed.${extension}` : `${name}-renamed`
+        },
+        {
+          src: 'src/assets/asset-1.js',
+          dest: 'dist',
+          rename: (_, __, fullPath) => path.basename(fullPath).replace(1, 3)
         }
       ]
     });
@@ -226,6 +233,7 @@ describe('Copy', () => {
     expect(await fs.pathExists('dist/scss-multiple/scss-2-renamed.scss')).toBe(true);
     expect(await fs.pathExists('dist/scss-multiple/nested-renamed')).toBe(true);
     expect(await fs.pathExists('dist/scss-multiple/nested-renamed/scss-3.scss')).toBe(true);
+    expect(await fs.pathExists('dist/asset-3.js')).toBe(true);
   });
 
   test('Throw if transform target is not a file', async () => {
@@ -254,6 +262,12 @@ describe('Copy', () => {
           src: 'src/assets/scss/**/*.scss',
           dest: 'dist',
           transform: (contents) => contents.toString().replace('background-color', 'color')
+        },
+        {
+          src: 'src/assets/css/css-1.css',
+          dest: 'dist/css',
+          transform: (contents, filename) =>
+            contents.toString().replace('blue', filename.replace('ss-1.css', 'oral'))
         }
       ]
     });
@@ -274,6 +288,8 @@ describe('Copy', () => {
     expect(await readFile('dist/scss-3.scss')).toEqual(
       expect.not.stringContaining('background-color')
     );
+    expect(await fs.pathExists('dist/css/css-1.css')).toBe(true);
+    expect(await readFile('dist/css/css-1.css')).toEqual(expect.stringContaining('coral'));
   });
 });
 
@@ -480,7 +496,7 @@ describe('Options', () => {
         format: 'esm'
       },
       plugins: [
-        copy({
+        copyMerge({
           targets: [{ src: 'src/assets/asset-1.js', dest: 'dist' }],
           copyOnce: true
         })

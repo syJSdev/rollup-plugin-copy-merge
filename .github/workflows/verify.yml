@@ -1,0 +1,56 @@
+name: Verify
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  verify:
+    name: 'PR: Verify'
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      # Checkout project repository
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          registry-url: https://registry.npmjs.org/
+          node-version: 14
+          cache: 'yarn'
+
+      # Install dependencies
+      - name: Install Dependencies
+        env:
+          HUSKY_SKIP_INSTALL: true # Skip install of Husky
+        run: yarn install --frozen-lockfile
+
+      # Clean
+      - name: Clean
+        run: yarn clean
+
+      # Lint
+      - name: Run eslint
+        run: yarn lint
+
+      # Tests
+      - name: Run tests
+        run: yarn test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+
+      # Build
+      - name: Run build
+        run: yarn build

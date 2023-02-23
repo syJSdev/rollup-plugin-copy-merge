@@ -54,27 +54,23 @@ Type: `Array` | Default: `[]`
 
 Array of targets to copy. A target is an object with properties:
 
-- **src** (`string` `Array`): Path or glob of what to copy
-- **dest** (`string` `Array`): One or more destinations where to copy
-- **file** (`string`): destination file where to copy. all source files will merge into this file. should set dest or file.
-- **rename** (`string` `Function`): Change destination file or folder name
-- **transform** (`Function`): Modify file contents
+- **src** (`string`, `Array`): Path or glob of what to copy
+- **dest** (`string`, `Array`): One or more destinations where to copy
+- **file** (`string`): destination file where to copy. all source files will merge into this file. (only supports for 'utf8' contents)
+- **rename** (`string`, `Function`): Change destination file or folder name
+- **transform** (`Function`): Modify file contents (only supports for 'utf8' contents)
 
-Each object should have **src** and **dest** properties, **rename** and **transform** are optional. [globby](https://github.com/sindresorhus/globby) is used inside, check it for [glob pattern](https://github.com/sindresorhus/globby#globbing-patterns) examples.
+Each object should have **dest** or **file**, and **src** properties, **rename** and **transform** are optional. [globby](https://github.com/sindresorhus/globby) is used inside, check it for [glob pattern](https://github.com/sindresorhus/globby#globbing-patterns) examples.
 
-#### Merge (extended)
+##### Merge (extended)
 
-Can merge using file attribute.
+Can merge using `file` attribute.
 
 ```js
 copy({
-  targets: [
-    { src: 'assets/js/*.js', file: 'dist/public/scripts1.js' },
-    { src: ['assets/umd/*.js', 'assets/iife/*.js'], file: 'dist/public/scripts2.js' }
-    { src: ['assets/umd/index.js', 'assets/iife/index.js'], file: 'dist/public/scripts3.js' }
-  ],
+  targets: [{ src: 'assets/polyfill/*.js', file: 'dist/public/polyfill.js' }],
   flatten: false
-})
+});
 ```
 
 ##### File
@@ -105,7 +101,12 @@ copy({
 
 ```js
 copy({
-  targets: [{ src: ['src/index.html', 'src/styles.css', 'assets/images'], dest: 'dist/public' }]
+  targets: [
+    {
+      src: ['src/index.html', 'src/styles.css', 'assets/images'],
+      dest: 'dist/public'
+    }
+  ]
 });
 ```
 
@@ -152,7 +153,7 @@ copy({
     {
       src: 'assets/docs/*',
       dest: 'dist/public/docs',
-      rename: (name, extension) => `${name}-v1.${extension}`
+      rename: (name, extension, src_path) => `${name}-v1.${extension}`
     }
   ]
 });
@@ -166,7 +167,8 @@ copy({
     {
       src: 'src/index.html',
       dest: 'dist/public',
-      transform: (contents) => contents.toString().replace('__SCRIPT__', 'app.js')
+      transform: (contents, src_file_name, src_path) =>
+        contents.toString().replace('__SCRIPT__', 'app.js')
     }
   ]
 });
@@ -227,7 +229,6 @@ copy({
 All other options are passed to packages, used inside:
 
 - [globby](https://github.com/sindresorhus/globby)
-- [fs-jetpack copy function](https://github.com/szwacz/fs-jetpack)
 
 ## Original Author
 
