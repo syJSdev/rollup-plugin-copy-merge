@@ -168,7 +168,7 @@ export default function copyMerge(options = {}) {
           const { src, contents, transformed, merged, dest } = copyTarget;
 
           if (transformed) {
-            await fs.outputFile(dest, contents);
+            if (contents) await fs.outputFile(dest, contents);
           } else if (merged) {
             if (contents) await fs.outputFile(dest, contents);
           } else {
