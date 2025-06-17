@@ -48,7 +48,7 @@
     "replace-in-file": "^6.3.5",
     "rimraf": "^3.0.2",
     "rollup": "^2.75.5",
-    "rollup-plugin-filesize": "^9.1.2"
+    "rollup-plugin-filesize": "^10.0.0"
   },
   "peerDependencies": {
     "@types/fs-extra": "^9.0.13",
@@ -62,7 +62,7 @@
     "readme.md"
   ],
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "keywords": [
     "rollup",
